@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FURIA | LOGIN</title>
+
+    <script src="js/funcoes.js"></script>
+
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="website icon" type="png" href="assets/img/logoFuria.png">
+</head>
+<body>
+
+<!-- conteudo caixa de login e video -->
+<div class="conteudo">
+
+    <!-- caixa de credenciais -->
+    <div class="esquerdo">
+        <div class="login">
+            <div class="aba">
+                <h1>LOGIN</h1>
+                <div class="box">
+                    <h3>E-mail:</h3>
+                    <input type="text" id="input_email">
+
+                    <h3>Senha:</h3>
+                    <input type="password" id="input_senha">
+
+                    <p>Não tem uma conta?<a href="./cadastro.html"><b> CADASTRAR</b></a></p> 
+    
+                    <div class="botao">
+                        <button onclick="entrar()">ENTRAR</button>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- caixa de video -->
+        <div class="video">
+            <div class="box2">
+                <img src="./assets/img/videoFuriaLoginGIf (online-video-cutter.com).gif" alt="">
+            </div>
+        </div>
+</div>
+
+<div class="login">
+    <div class="alerta_erro">
+        <div class="card_erro" id="cardErro">
+        </div>
+    </div>
+    
+            <div id="div_aguardar" class="loading-div">
+            </div>
+
+            <div id="div_erros_login"></div>
+        </div>
+
+
+
+</body>
+</html>
+
+<script>
+
+
+    function entrar() {
+        aguardar();
+
+        var emailVar = input_email.value;
+        var senhaVar = input_senha.value;
+
+        if (emailVar == "" || senhaVar == "") {
+            cardErro.style.display = "block"
+            finalizarAguardar();
+            return false;
+        }
+        else {
+            setInterval(sumirMensagem, 5000)
+        }
+        fetch("/usuarios/autenticar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                emailServer: emailVar,
+                senhaServer: senhaVar
+            })
+        }).then(function (resposta) {
+            console.log("ESTOU NO THEN DO entrar()!")
+
+            if (resposta.ok) {
+                console.log(resposta);
+
+                resposta.json().then(json => {
+                    console.log(json);
+                    console.log(JSON.stringify(json));
+
+                    sessionStorage.EMAIL_USUARIO = json.email;
+                    sessionStorage.NOME_USUARIO = json.nome;
+                    sessionStorage.ID_USUARIO = json.id;
+
+                    setTimeout(function () {
+                        
+                    window.location = "dashboard/dashboard.html";
+                    }, 1000); // apenas para exibir o loading
+
+                });
+
+            } else {
+
+                span_msg.innerHTML = 'Senha ou Email inválidos'
+
+                console.log("Houve um erro ao tentar realizar o login!");
+
+                resposta.text().then(texto => {
+                    console.error(texto);
+                    finalizarAguardar(texto);
+                });
+            }
+
+        }).catch(function (erro) {
+            console.log(erro);
+        })
+
+        return false;
+    }
+
+    function sumirMensagem() {
+        cardErro.style.display = "none"
+    }
+
+</script>
